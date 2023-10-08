@@ -1,0 +1,60 @@
+version: '3.8'
+services:
+    #Laravel Service
+    notificationcenter:
+        build:
+            context: ../.
+            dockerfile: Dockerfile
+        container_name: notificationcenter
+        restart: unless-stopped
+        tty: true
+        environment:
+            SERVICE_NAME: app
+            SERVICE_TAGS: dev
+        working_dir: /var/www/app
+        volumes:
+            - .././:/var/www/app
+            - ./php/local.ini:/usr/local/etc/php/conf.d/local.ini
+        networks:
+            - notificationcenter-network
+    #MySQL Service
+    notificationcenter-mysql:
+        image: mysql
+        container_name: notificationcenter-mysql
+        restart: unless-stopped
+        tty: true
+        ports:
+            - "3308:3306"
+        environment:
+            MYSQL_DATABASE: laravelapp
+            MYSQL_ROOT_PASSWORD: password
+            SERVICE_TAGS: dev
+            SERVICE_NAME: mysql
+        volumes:
+            - ./mysql/data/:/var/lib/mysql/
+            - ./mysql/my.cnf:/etc/mysql/my.cnf
+            - ./mysql/init:/docker-entrypoint-initdb.d
+        networks:
+            - notificationcenter-network
+    #RabbitMQ Service
+    notificationcenter-rabbitmq:
+        image: "rabbitmq:3-management"
+        container_name: notificationcenter-rabbitmq
+        restart: unless-stopped
+        tty: true
+        ports:
+            - "0.0.0.0:5672:5672"
+            - "0.0.0.0:15672:15672"
+        volumes:
+            - ./rabbitmq/data/:/var/lib/rabbitmq/
+            - ./rabbitmq/log/:/var/log/rabbitmq/
+        networks:
+            - notificationcenter-network
+#Docker Networks
+networks:
+    notificationcenter-network:
+        driver: bridge
+#Volumes
+volumes:
+    laravelapp-mysql:
+        driver: local
