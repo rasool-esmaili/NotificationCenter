@@ -12,6 +12,7 @@ RUN docker-php-ext-install bcmath
 RUN pecl install -o -f redis &&  rm -rf /tmp/pear && docker-php-ext-enable redis
 RUN docker-php-ext-install zip
 RUN docker-php-ext-install sockets
+RUN docker-php-ext-install pcntl
 WORKDIR /var/www/app
 COPY . .
 #RUN cp .env.develop .env
