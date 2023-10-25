@@ -9,16 +9,18 @@ RUN cd /tmp && wget https://pecl.php.net/get/swoole-5.1.0.tgz && \
     make && make install
 RUN touch /usr/local/etc/php/conf.d/swoole.ini && echo 'extension=swoole.so' > /usr/local/etc/php/conf.d/swoole.ini
 RUN docker-php-ext-install bcmath
-RUN pecl install -o -f redis &&  rm -rf /tmp/pear && docker-php-ext-enable redis
+#RUN pecl install -o -f redis &&  rm -rf /tmp/pear && docker-php-ext-enable redis
 RUN docker-php-ext-install zip
 RUN docker-php-ext-install sockets
 RUN docker-php-ext-install pcntl
 WORKDIR /var/www/app
-COPY . .
 #RUN cp .env.develop .env
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
-RUN composer install
-#EXPOSE 9501
+ARG HOST_UID
+ARG HOST_GID
+RUN groupadd --force -g $HOST_GID r-esmaeili
+RUN useradd -u $HOST_GID -g r-esmaeili -m r-esmaeili
+USER r-esmaeili
 #ENV TZ='Tehran-3:30'
 #CMD ["/usr/local/bin/php", "/app/Start.php"]
 
